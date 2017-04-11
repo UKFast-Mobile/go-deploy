@@ -5,7 +5,7 @@ type DeployServerConfig struct {
 	Port       string            `json:"port,omitempty"`
 	Username   string            `json:"username"`
 	Repo       string            `json:"repo"`
-	Refs       string            `json:"refs"`
+	Ref        string            `json:"refs"`
 	Path       string            `json:"path"`
 	Cmd        string            `json:"cmd"`
 	PrivateKey string            `json:"privateKey,omitempty"`
