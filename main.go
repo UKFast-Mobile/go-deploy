@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"/commands"
+	"gitlab.devops.ukfast.co.uk/fastbase/go-deploy/commands"
 
 	"github.com/urfave/cli"
 )
