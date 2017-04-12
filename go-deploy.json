@@ -1,0 +1,10 @@
+{
+  "stage": {
+    "host": "",
+    "username": "",
+    "repo": "",
+    "refs": "",
+    "path": "",
+    "cmd": ""
+  }
+}
