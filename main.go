@@ -3,9 +3,8 @@ package main
 import (
 	"os"
 
-	"gitlab.devops.ukfast.co.uk/fastbase/go-deploy/commands"
-
-	"github.com/urfave/cli"
+	"github.com/UKFast-Mobile/go-deploy/commands"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // Debug - show logs
@@ -35,6 +34,5 @@ func main() {
 	app.Commands = []cli.Command{
 		commands.Setup,
 	}
-
 	app.Run(os.Args)
 }
