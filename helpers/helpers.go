@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -10,7 +11,7 @@ import (
 var ConfigFilePath = "./go-deploy.json"
 
 // OpenConfigFile opens an existing config file or creates a new one if it doesn't exists
-func OpenConfigFile() (*map[string]interface{}, error) {
+func OpenConfigFile() (map[string]interface{}, error) {
 	file, err := os.OpenFile(ConfigFilePath, os.O_RDWR|os.O_CREATE, 0644)
 	defer file.Close()
 
@@ -26,10 +27,10 @@ func OpenConfigFile() (*map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var fileJSON *map[string]interface{}
+	var fileJSON map[string]interface{}
 	if fileSize == 0 {
 		// empty file, create empty map
-		fileJSON = new(map[string]interface{})
+		fileJSON = map[string]interface{}{}
 	} else {
 		// get json
 		err = json.Unmarshal(data, &fileJSON)
@@ -50,4 +51,13 @@ func WriteToFile(j map[string]interface{}) error {
 
 	err = ioutil.WriteFile(ConfigFilePath, data, 0644)
 	return err
+}
+
+// FailOnError panics and displays the message if an error passed
+// is not nil
+func FailOnError(err error, msg string) {
+	if err != nil {
+		errMsg := fmt.Sprintf("%s: %s", msg, err.Error())
+		panic(errMsg)
+	}
 }

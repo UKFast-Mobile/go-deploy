@@ -6,16 +6,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/UKFast-Mobile/go-deploy/helpers"
 	"github.com/UKFast-Mobile/go-deploy/model"
-
-	"github.com/ttacon/chalk"
 
 	"reflect"
 
-	"io/ioutil"
-
-	"encoding/json"
-
+	"github.com/ttacon/chalk"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -37,12 +33,19 @@ var Setup = cli.Command{
 		}
 
 		force := c.Bool("force")
-		
+		if force {
+			fmt.Println(chalk.Red, "! running in force mode will override current configuration (if exists)")
+		}
+
 		configName := c.Args()[0]
-		fmt.Printf("Did get config name: %s\n", configName)
+		fmt.Println(chalk.Magenta, "Setting up ", chalk.Bold.TextStyle(configName), " deployment configuration")
 
-
-
+		// Load the configuration file
+		file, err := helpers.OpenConfigFile()
+		if file[configName] != nil && !force {
+			fmt.Println(chalk.Red, "Failed: configuration already exists!")
+			os.Exit(1)
+		}
 
 		config := model.DeployServerConfig{}
 		t := reflect.TypeOf(config)
@@ -60,41 +63,9 @@ var Setup = cli.Command{
 			}
 		}
 
-		// var file *os.File
-		// fileInfo, err := os.Stat("./go-deploy.json")
-
-		file, err := os.OpenFile("./go-deploy.json", os.O_RDWR|os.O_CREATE, 0666)
-		defer file.Close()
-
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var fileJSON map[string]interface{}
-		_ = json.Unmarshal(data, &fileJSON)
-
-		if fileJSON[configName] != nil && !force {
-			// config already exists
-			log.Fatal("Config with given  name already exists!")
-		} else {
-
-			if fileJSON == nil {
-				fileJSON = map[string]interface{}{}
-			}
-
-			fileJSON[configName] = config
-			backToJSON, err := json.MarshalIndent(fileJSON, "", "  ")
-			if err != nil {
-				log.Println(err)
-				os.Exit(1)
-			}
-
-			err = ioutil.WriteFile("./go-deploy.json", backToJSON, 0644)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+		file[configName] = config
+		err = helpers.WriteToFile(file)
+		helpers.FailOnError(err, "Failed to write to a config file")
 
 		os.Exit(0)
 	},
