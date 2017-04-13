@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/UKFast-Mobile/go-deploy/helpers"
@@ -34,16 +33,17 @@ var Setup = cli.Command{
 
 		force := c.Bool("force")
 		if force {
-			fmt.Println(chalk.Red, "! running in force mode will override current configuration (if exists)")
+			fmt.Println(chalk.Red.Color("! running in force mode will override current configuration (if exists)"))
 		}
 
 		configName := c.Args()[0]
-		fmt.Println(chalk.Magenta, "Setting up ", chalk.Bold.TextStyle(configName), " deployment configuration")
+
+		fmt.Println(chalk.Magenta.Color("Setting up "), chalk.Bold.TextStyle(chalk.Magenta.Color(configName)), chalk.Magenta.Color(" deployment configuration"))
 
 		// Load the configuration file
 		file, err := helpers.OpenConfigFile()
 		if file[configName] != nil && !force {
-			fmt.Println(chalk.Red, "Failed: configuration already exists!")
+			fmt.Println(chalk.Red.Color("Failed: configuration already exists!"))
 			os.Exit(1)
 		}
 
@@ -51,7 +51,6 @@ var Setup = cli.Command{
 		t := reflect.TypeOf(config)
 
 		scanner := bufio.NewScanner(os.Stdin)
-		log.Printf("Num fields: %d", t.NumField())
 
 		for i := 0; i < t.NumField(); i++ {
 			field := t.Field(i)
@@ -66,6 +65,8 @@ var Setup = cli.Command{
 		file[configName] = config
 		err = helpers.WriteToFile(file)
 		helpers.FailOnError(err, "Failed to write to a config file")
+
+		fmt.Println(chalk.Green.Color("Finished successfully"))
 
 		os.Exit(0)
 	},

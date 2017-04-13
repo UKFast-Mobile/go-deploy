@@ -1,10 +1,20 @@
 {
   "stage": {
+    "cmd": "",
     "host": "",
-    "username": "",
-    "repo": "",
-    "refs": "",
     "path": "",
-    "cmd": ""
+    "refs": "",
+    "repo": "",
+    "username": ""
+  },
+  "test": {
+    "host": "asd",
+    "port": "asd",
+    "username": "asd",
+    "repo": "asd",
+    "refs": "asd",
+    "path": "asd",
+    "cmd": "asd",
+    "privateKey": "asd"
   }
 }
