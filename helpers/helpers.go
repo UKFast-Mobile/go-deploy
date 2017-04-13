@@ -2,13 +2,33 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/UKFast-Mobile/go-deploy/model"
+	"golang.org/x/crypto/ssh"
 )
 
 // ConfigFilePath default config file name
 var ConfigFilePath = "./go-deploy.json"
+
+// LoadConfiguration loads deployment configuration from a file with the given name and sets config struct properties accordingly
+func LoadConfiguration(name string, c *model.DeployServerConfig) error {
+	file, err := OpenConfigFile()
+	FailOnError(err, "Failed to open configuration file, see help for usage.")
+	configInfo := file[name]
+	if configInfo == nil {
+		FailOnError(errors.New("Configuration not found"), "Failed to load given configuration")
+	}
+
+	data, err := json.Marshal(configInfo)
+	FailOnError(err, "Failed to parse configuraiton JSON")
+
+	err = json.Unmarshal(data, &c)
+	return err
+}
 
 // OpenConfigFile opens an existing config file or creates a new one if it doesn't exists
 func OpenConfigFile() (map[string]interface{}, error) {
@@ -60,4 +80,14 @@ func FailOnError(err error, msg string) {
 		errMsg := fmt.Sprintf("%s: %s", msg, err.Error())
 		panic(errMsg)
 	}
+}
+
+func PublicKeyFile(file string) ssh.AuthMethod {
+	buffer, err := ioutil.ReadFile(file)
+	FailOnError(err, "Private key not found")
+
+	key, err := ssh.ParsePrivateKey(buffer)
+	FailOnError(err, "Failed to parse private key")
+
+	return ssh.PublicKeys(key)
 }
