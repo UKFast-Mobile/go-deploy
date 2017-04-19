@@ -14,3 +14,37 @@
 ```
  go get gopkg.in/UKFast-Mobile/go-deploy.v0
 ```
+
+## Commands
+
+### Setup
+
+> Provides convenince CLI to setup a `go-deploy.json` file configuration
+
+```
+go-deploy setup staging
+```
+
+### Prepare
+
+> Prepares remote server in accordance to the `go-deploy.json` configuration file
+
+```
+go-deploy prepare staging
+```
+
+### Deploy (main)
+
+> Deploys your application in accordance ot the `go-deploy.json` configuration file
+
+```
+go-deploy staging
+```
+
+### Help
+
+> Shows usage information for the go-deploy CLI
+
+```
+go-deploy help
+```
