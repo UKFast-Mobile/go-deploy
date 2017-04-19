@@ -1,16 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/UKFast-Mobile/go-deploy/commands"
 	"github.com/UKFast-Mobile/go-deploy/helpers"
 	"github.com/UKFast-Mobile/go-deploy/model"
+	"github.com/ttacon/chalk"
 	"gopkg.in/urfave/cli.v1"
 )
-
-// Debug - show logs
-var Debug bool
 
 func main() {
 	app := cli.NewApp()
@@ -26,10 +25,10 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name:        "debug",
+			Name:        "debug, d",
 			Usage:       "Show debug logs (verbose mode)",
 			EnvVar:      "DEBUG",
-			Destination: &Debug,
+			Destination: &helpers.Debug,
 		},
 	}
 
@@ -47,38 +46,27 @@ func main() {
 
 		configName := c.Args()[0]
 
-		var config model.DeployServerConfig
-		err := helpers.LoadConfiguration(configName, &config)
+		config := new(model.DeployServerConfig)
+		err := helpers.LoadConfiguration(configName, config)
 		if err != nil {
 			return err
 		}
 
-		// deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
+		deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
 
-		// fmt.Println(chalk.Blue.Color(fmt.Sprintf("Deploying to %s ...", deployNameStyle(configName))))
+		fmt.Println(chalk.Blue.Color(fmt.Sprintf("Deploying to %s ...", deployNameStyle(configName))))
 
-		// // ssh into the deployment server
-		// sshConfig := &ssh.ClientConfig{
-		// 	User: config.Username,
-		// 	Auth: []ssh.AuthMethod{
-		// 		helpers.PublicKeyFile(config.PrivateKey),
-		// 	},
-		// }
+		// ssh into the deployment server
+		commands := []string{
+			fmt.Sprintf("cd %s/source && git checkout -q %s && git pull -q %s %s", config.Path, config.BranchName(), config.RemoteName(), config.BranchName()),
+			fmt.Sprintf("cd %s/source && %s", config.Path, config.Cmd),
+		}
 
-		// connection, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", config.Host, config.Port), sshConfig)
-		// helpers.FailOnError(err, "Failed to dial deployment server")
-		// defer connection.Close()
+		output, err := helpers.ExecuteCmd(commands, config)
+		helpers.LogDebug(output)
+		helpers.FailOnError(err, "Failed to deploy to server")
 
-		// session, err := connection.NewSession()
-		// helpers.FailOnError(err, "Failed to create a session with the deployment server")
-		// defer session.Close()
-
-		// fmt.Println(chalk.Blue.Color(fmt.Sprintf("On %s", deployNameStyle(configName))))
-
-		// err = session.Run(fmt.Sprintf("mkdir -p %s", config.Path))
-		// helpers.FailOnError(err, "Failed to create deployment folder")
-
-		// err = session.Run(fmt.Sprintf("git clone %s"))
+		fmt.Println(chalk.Green.Color("Deployed successfully"))
 
 		return nil
 	}

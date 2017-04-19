@@ -1,5 +1,14 @@
 package model
 
+import (
+	"fmt"
+	"io/ioutil"
+
+	"strings"
+
+	"golang.org/x/crypto/ssh"
+)
+
 // DeployServerConfig configuration for the server communication
 type DeployServerConfig struct {
 	Host       string            `json:"host" cli_q:"Host: "`
@@ -15,5 +24,42 @@ type DeployServerConfig struct {
 
 // Verify verfies if the config is of correct format
 func (c *DeployServerConfig) Verify() error {
+	// TODO: verify config setup is correct.
 	return nil
+}
+
+// SSHConfig returns an ssh config for the deployment configuration
+func (c *DeployServerConfig) SSHConfig() *ssh.ClientConfig {
+	return &ssh.ClientConfig{
+		User: c.Username,
+		Auth: []ssh.AuthMethod{
+			publicKeyFile(c.PrivateKey),
+		},
+	}
+}
+
+// BranchName returns a branch name from a given refs
+func (c *DeployServerConfig) BranchName() string {
+	return strings.Split(c.Ref, "/")[1]
+}
+
+// RemoteName returns a remote name from a given refs
+func (c *DeployServerConfig) RemoteName() string {
+	return strings.Split(c.Ref, "/")[0]
+}
+
+func publicKeyFile(file string) ssh.AuthMethod {
+	buffer, err := ioutil.ReadFile(file)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s: %s", "Private key not found", err.Error())
+		panic(errMsg)
+	}
+
+	key, err := ssh.ParsePrivateKey(buffer)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s: %s", "Private key not found", err.Error())
+		panic(errMsg)
+	}
+
+	return ssh.PublicKeys(key)
 }

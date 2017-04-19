@@ -24,7 +24,7 @@
     "repo": "git@gitlab.devops.ukfast.co.uk:fastbase/feedback.git",
     "refs": "origin/develop",
     "path": "fastbase-forms",
-    "cmd": "docker-compose kill && docker-compose up -d",
+    "cmd": "pwd",
     "privateKey": "/Users/aleksandrkelbas/.ssh/id_rsa"
   }
 }

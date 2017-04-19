@@ -7,12 +7,22 @@ import (
 	"io/ioutil"
 	"os"
 
+	"bytes"
+
+	"log"
+
+	"strconv"
+
 	"github.com/UKFast-Mobile/go-deploy/model"
+	"github.com/ttacon/chalk"
 	"golang.org/x/crypto/ssh"
 )
 
 // ConfigFilePath default config file name
 var ConfigFilePath = "./go-deploy.json"
+
+// Debug holds information if CLI run with the debug flag
+var Debug bool
 
 // LoadConfiguration loads deployment configuration from a file with the given name and sets config struct properties accordingly
 func LoadConfiguration(name string, c *model.DeployServerConfig) error {
@@ -82,12 +92,64 @@ func FailOnError(err error, msg string) {
 	}
 }
 
-func PublicKeyFile(file string) ssh.AuthMethod {
-	buffer, err := ioutil.ReadFile(file)
-	FailOnError(err, "Private key not found")
+// ExecuteCmd establishes a secure shell session with the remote and executes provided commands.
+// Note - context isn't preserved between commands
+func ExecuteCmd(cmd []string, deployConfig *model.DeployServerConfig) (string, error) {
+	conn, err := ssh.Dial("tcp", deployConfig.Host+":"+deployConfig.Port, deployConfig.SSHConfig())
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
 
-	key, err := ssh.ParsePrivateKey(buffer)
-	FailOnError(err, "Failed to parse private key")
+	var stdoutBuf bytes.Buffer
+	var debug bool
+	GetEnvBool("DEBUG", &debug)
 
-	return ssh.PublicKeys(key)
+	for _, command := range cmd {
+		LogDebug(fmt.Sprintf("Running command: %s", command))
+		session, err := conn.NewSession()
+		if err != nil {
+			return "", err
+		}
+		defer session.Close()
+		session.Stdout = &stdoutBuf
+		err = session.Run(command)
+		if err != nil {
+			LogDebug(fmt.Sprintf("Failed, stdoutbuf: %s", stdoutBuf.String()))
+			return "", err
+		}
+	}
+
+	return stdoutBuf.String(), nil
+}
+
+// GetEnv populates your variable with the env var value
+func GetEnv(name string, target *string) {
+	value := os.Getenv(name)
+	if value != "" {
+		*target = value
+	}
+}
+
+// GetEnvBool parses environment variable to a bool
+func GetEnvBool(name string, target *bool) {
+	var result string
+
+	GetEnv(name, &result)
+	b, _ := strconv.ParseBool(result)
+	*target = b
+}
+
+// LogDebug logs only if debug passed is true
+func LogDebug(msg string) {
+	if Debug {
+		dlog := chalk.Magenta.NewStyle().
+			WithTextStyle(chalk.Italic).Style
+		log.Printf(dlog(msg))
+	}
+}
+
+// LogDebugf logs only if debug passed is true, you can use format here
+func LogDebugf(format string, a ...interface{}) {
+	LogDebug(fmt.Sprintf(format, a))
 }

@@ -2,9 +2,6 @@ package commands
 
 import (
 	"os"
-	"strings"
-
-	"golang.org/x/crypto/ssh"
 
 	"fmt"
 
@@ -26,48 +23,29 @@ var Prepare = cli.Command{
 
 		configName := c.Args()[0]
 
-		var config model.DeployServerConfig
-		err := helpers.LoadConfiguration(configName, &config)
+		config := new(model.DeployServerConfig)
+		err := helpers.LoadConfiguration(configName, config)
 		if err != nil {
 			return err
 		}
 
 		deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
-		fmt.Println(chalk.Blue.Color(fmt.Sprintf("Setting up %s ...", deployNameStyle(configName))))
+		fmt.Println(chalk.Blue.Color(fmt.Sprintf("Preparing %s ...", deployNameStyle(configName))))
 
 		// ssh into the deployment server
-		sshConfig := &ssh.ClientConfig{
-			User: config.Username,
-			Auth: []ssh.AuthMethod{
-				helpers.PublicKeyFile(config.PrivateKey),
-			},
+		remoteName := config.RemoteName()
+		branchName := config.BranchName()
+
+		commands := []string{
+			"rm -rf " + config.Path,
+			"mkdir -p " + config.Path,
+			fmt.Sprintf("cd %s && git clone -b %s -o %s --single-branch %s source", config.Path, branchName, remoteName, config.Repo),
 		}
 
-		connection, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", config.Host, config.Port), sshConfig)
-		helpers.FailOnError(err, "Failed to dial deployment server")
-		defer connection.Close()
+		_, err = helpers.ExecuteCmd(commands, config)
+		helpers.FailOnError(err, "Failed to prepare remote server folder")
 
-		session, err := connection.NewSession()
-		helpers.FailOnError(err, "Failed to create a session with the deployment server")
-		defer session.Close()
-
-		fmt.Println(chalk.Blue.Color(fmt.Sprintf("On %s", deployNameStyle(configName))))
-
-		err = session.Run(fmt.Sprintf("rm -rf %s", config.Path))
-		helpers.FailOnError(err, "Failed to remove old directory")
-
-		err = session.Run(fmt.Sprintf("mkdir -p %s", config.Path))
-		helpers.FailOnError(err, "Failed to create deployment folder")
-
-		err = session.Run(fmt.Sprintf("cd %s", config.Path))
-		helpers.FailOnError(err, "Failed to navigate to deployment folder")
-
-		refs := strings.Split(config.Ref, "/")
-		remoteName := refs[0]
-		branchName := refs[1]
-
-		err = session.Run(fmt.Sprintf("git clone -b %s -o %s %s source", branchName, remoteName, config.Repo))
-		helpers.FailOnError(err, "Failed to clone remote repository")
+		fmt.Println(chalk.Green.Color("Succesfully prepared"))
 
 		return nil
 	},
