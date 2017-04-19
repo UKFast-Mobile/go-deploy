@@ -8,3 +8,9 @@
 > Deployment CLI tool
 
 ## :hammer: Work in progress
+
+## Installation
+
+```
+ go get gopkg.in/UKFast-Mobile/go-deploy.v0
+```
