@@ -9,6 +9,8 @@
 
 ## :hammer: Work in progress
 
+# :open_book: Usage
+
 ## Installation
 
 ```
