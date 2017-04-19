@@ -5,7 +5,6 @@ import (
 
 	. "github.com/franela/goblin"
 	. "github.com/onsi/gomega"
-	"github.com/urfave/cli"
 )
 
 func TestSetup(t *testing.T) {
@@ -25,14 +24,9 @@ func TestSetup(t *testing.T) {
 
 			g.It("must have a `force` flag", func() {
 				Expect(setup.Flags).To(HaveLen(1))
-				flag := setup.Flags[0]
 
-				boolFlag, ok := flag.(cli.BoolFlag)
-				if ok {
-					Expect(boolFlag.Name).To(Equal("force, f"))
-				} else {
-					g.Fail("force flag must be a bool type flag")
-				}
+				flag := setup.Flags[0]
+				Expect(flag.GetName()).To(Equal("force, f"))
 			})
 		})
 	})
