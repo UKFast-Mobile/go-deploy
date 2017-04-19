@@ -1,10 +1,7 @@
 language: go
+sudo: false
 
 before_install:
- - go get -t -v ./...
-
+  - go get github.com/mattn/goveralls
 script:
- - go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
-
-after_success:
- - bash < (curl -s https://codecov.io/bash)
+  - $HOME/gopath/bin/goveralls -service=travis-ci
