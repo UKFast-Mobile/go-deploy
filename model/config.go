@@ -12,3 +12,8 @@ type DeployServerConfig struct {
 	PrivateKey string            `json:"privateKey,omitempty" cli_q:"Private key path: "`
 	Env        map[string]string `json:"env,omitempty"`
 }
+
+// Verify verfies if the config is of correct format
+func (c *DeployServerConfig) Verify() error {
+	return nil
+}

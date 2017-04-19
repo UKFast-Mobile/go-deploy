@@ -21,10 +21,10 @@
     "host": "172.16.27.7",
     "port": "22",
     "username": "mobileteamserver",
-    "repo": "",
-    "refs": "",
-    "path": "",
-    "cmd": "",
-    "privateKey": "~/.ssh/id_rsa"
+    "repo": "git@gitlab.devops.ukfast.co.uk:fastbase/feedback.git",
+    "refs": "origin/develop",
+    "path": "fastbase-forms",
+    "cmd": "docker-compose kill && docker-compose up -d",
+    "privateKey": "/Users/aleksandrkelbas/.ssh/id_rsa"
   }
 }

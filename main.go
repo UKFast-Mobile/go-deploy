@@ -1,17 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
-
-	"golang.org/x/crypto/ssh"
-
-	"log"
 
 	"github.com/UKFast-Mobile/go-deploy/commands"
 	"github.com/UKFast-Mobile/go-deploy/helpers"
 	"github.com/UKFast-Mobile/go-deploy/model"
-	"github.com/ttacon/chalk"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -41,6 +35,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		commands.Setup,
+		commands.Prepare,
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -58,32 +53,32 @@ func main() {
 			return err
 		}
 
-		deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
+		// deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
 
-		fmt.Println(chalk.Blue.Color(fmt.Sprintf("Deploying to %s ...", deployNameStyle(configName))))
+		// fmt.Println(chalk.Blue.Color(fmt.Sprintf("Deploying to %s ...", deployNameStyle(configName))))
 
-		// ssh into the deployment server
-		sshConfig := &ssh.ClientConfig{
-			User: config.Username,
-			Auth: []ssh.AuthMethod{
-				helpers.PublicKeyFile(config.PrivateKey),
-			},
-		}
+		// // ssh into the deployment server
+		// sshConfig := &ssh.ClientConfig{
+		// 	User: config.Username,
+		// 	Auth: []ssh.AuthMethod{
+		// 		helpers.PublicKeyFile(config.PrivateKey),
+		// 	},
+		// }
 
-		connection, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", config.Host, config.Port), sshConfig)
-		helpers.FailOnError(err, "Failed to dial deployment server")
-		defer connection.Close()
+		// connection, err := ssh.Dial("tcp", fmt.Sprintf("%s:%s", config.Host, config.Port), sshConfig)
+		// helpers.FailOnError(err, "Failed to dial deployment server")
+		// defer connection.Close()
 
-		session, err := connection.NewSession()
-		helpers.FailOnError(err, "Failed to create a session with the deployment server")
-		defer session.Close()
+		// session, err := connection.NewSession()
+		// helpers.FailOnError(err, "Failed to create a session with the deployment server")
+		// defer session.Close()
 
-		data, err := session.Output("pwd")
-		helpers.FailOnError(err, "Failed to run pwd")
+		// fmt.Println(chalk.Blue.Color(fmt.Sprintf("On %s", deployNameStyle(configName))))
 
-		result := string(data)
+		// err = session.Run(fmt.Sprintf("mkdir -p %s", config.Path))
+		// helpers.FailOnError(err, "Failed to create deployment folder")
 
-		log.Printf("%s: %s", config.Host, result)
+		// err = session.Run(fmt.Sprintf("git clone %s"))
 
 		return nil
 	}
