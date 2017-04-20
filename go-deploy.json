@@ -25,6 +25,6 @@
     "refs": "origin/develop",
     "path": "go-deploy-test",
     "cmd": "pwd && ls",
-    "privateKey": "/Users/aleksandrkelbas/.ssh/id_rsa"
+    "privateKey": "test_id_rsa"
   }
 }

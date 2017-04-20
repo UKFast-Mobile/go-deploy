@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 
@@ -27,6 +26,8 @@ func TestConfig(t *testing.T) {
 
 			g.It("must be able to verify configuration", func() {
 				var config DeployServerConfig
+				pwd := os.Getenv("PWD")
+				config.PrivateKey = pwd + "/test_id_rsa"
 				err := loadConfiguration("thebin", &config)
 				Expect(err).To(BeNil())
 				err = config.Verify()
@@ -54,7 +55,8 @@ func TestConfig(t *testing.T) {
 			})
 
 			g.It("should be able to generate ssh config from a given configuration", func() {
-				log.Printf("Config ssh key path: %s", config.PrivateKey)
+				pwd := os.Getenv("PWD")
+				config.PrivateKey = pwd + "/test_id_rsa"
 				sshConfig := config.SSHConfig()
 				Expect(sshConfig).ToNot(BeNil())
 				Expect(sshConfig.User).To(Equal("mobileteamserver"))
