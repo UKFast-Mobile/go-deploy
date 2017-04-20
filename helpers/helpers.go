@@ -27,14 +27,19 @@ var Debug bool
 // LoadConfiguration loads deployment configuration from a file with the given name and sets config struct properties accordingly
 func LoadConfiguration(name string, c *model.DeployServerConfig) error {
 	file, err := OpenConfigFile()
-	FailOnError(err, "Failed to open configuration file, see help for usage.")
+	if err != nil {
+		return err
+	}
+
 	configInfo := file[name]
 	if configInfo == nil {
-		FailOnError(errors.New("Configuration not found"), "Failed to load given configuration")
+		return errors.New("Configuration not found")
 	}
 
 	data, err := json.Marshal(configInfo)
-	FailOnError(err, "Failed to parse configuraiton JSON")
+	if err != nil {
+		return err
+	}
 
 	err = json.Unmarshal(data, &c)
 	return err
@@ -136,8 +141,13 @@ func GetEnvBool(name string, target *bool) {
 	var result string
 
 	GetEnv(name, &result)
-	b, _ := strconv.ParseBool(result)
-	*target = b
+	if result != "" {
+		b, err := strconv.ParseBool(result)
+		if err == nil {
+			*target = b
+		}
+	}
+
 }
 
 // LogDebug logs only if debug passed is true

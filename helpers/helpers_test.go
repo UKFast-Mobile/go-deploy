@@ -10,6 +10,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/UKFast-Mobile/go-deploy/model"
 	. "github.com/franela/goblin"
 	. "github.com/onsi/gomega"
 )
@@ -119,5 +120,78 @@ func TestHelpers(t *testing.T) {
 				}()
 			})
 		})
+
+		g.Describe("LoadConfiguration fucntion", func() {
+			g.Before(func() {
+				ConfigFilePath = "./../go-deploy.json"
+			})
+
+			g.It("Should be able to load `test` configuration without an error", func() {
+				var config model.DeployServerConfig
+				err := LoadConfiguration("test", &config)
+				Expect(err).To(BeNil())
+				Expect(config).ToNot(BeNil())
+			})
+
+			g.It("Should result in error for an unregistered configuration name", func() {
+				var config model.DeployServerConfig
+				err := LoadConfiguration("this does not exists", &config)
+				Expect(err).ToNot(BeNil())
+				Expect(err.Error()).To(Equal("Configuration not found"))
+			})
+
+			g.It("Should result in error for unexisting configuration file", func() {
+				ConfigFilePath = "./this_does_not_exists.json"
+				var config model.DeployServerConfig
+				err := LoadConfiguration("test", &config)
+				Expect(err).ToNot(BeNil())
+			})
+		})
+
+		g.Describe("GetEnv function", func() {
+			g.It("Should be able to get env variable", func() {
+				err := os.Setenv("TEST_VAR", "TEST")
+				Expect(err).To(BeNil())
+				var myVar string
+				GetEnv("TEST_VAR", &myVar)
+				Expect(myVar).To(Equal("TEST"))
+			})
+
+			g.It("Should fail silently if env varialbe doesn't exists, allowing for a default var implementation", func() {
+				myVar := "doesn't exist"
+				GetEnv("TEST_VAR_NOT_SET", &myVar)
+				Expect(myVar).To(Equal("doesn't exist"))
+			})
+		})
+
+		g.Describe("GetEnvBool function", func() {
+			g.It("Should be able to get boolean environment varialbe", func() {
+				err := os.Setenv("TEST_VAR", "true")
+				Expect(err).To(BeNil())
+				var myVar bool
+				GetEnvBool("TEST_VAR", &myVar)
+				Expect(myVar).To(BeTrue())
+				err = os.Setenv("TEST_VAR", "1")
+				Expect(err).To(BeNil())
+				myVar = false
+				GetEnvBool("TEST_VAR", &myVar)
+				Expect(myVar).To(BeTrue())
+			})
+
+			g.It("Should fail silently if var not set", func() {
+				myVar := true
+				GetEnvBool("TEST_VAR_NOT_SET", &myVar)
+				Expect(myVar).To(BeTrue())
+			})
+
+			g.It("Should fall back to default if var isn't a boolean", func() {
+				err := os.Setenv("TEST_VAR", "Hello")
+				Expect(err).To(BeNil())
+				myVar := false
+				GetEnvBool("TEST_VAR", &myVar)
+				Expect(myVar).To(BeFalse())
+			})
+		})
+
 	})
 }
