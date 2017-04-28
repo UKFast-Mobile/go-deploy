@@ -147,7 +147,13 @@ func GetEnvBool(name string, target *bool) {
 			*target = b
 		}
 	}
+}
 
+// SetEnvVars sets environment variables as per configuration
+func SetEnvVars(config *model.DeployServerConfig) {
+	for k := range config.EnvVars {
+		os.Setenv(k, config.EnvVars[k])
+	}
 }
 
 // LogDebug logs only if debug passed is true

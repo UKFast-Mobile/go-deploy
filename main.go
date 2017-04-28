@@ -52,6 +52,9 @@ func main() {
 			return err
 		}
 
+		// Set env vars if any
+		helpers.SetEnvVars(config)
+
 		deployNameStyle := chalk.Cyan.NewStyle().WithTextStyle(chalk.Bold).Style
 
 		fmt.Println(chalk.Blue.Color(fmt.Sprintf("Deploying to %s ...", deployNameStyle(configName))))
