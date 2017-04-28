@@ -24,7 +24,6 @@ type DeployServerConfig struct {
 
 // Verify verfies if the config is of correct format
 func (c *DeployServerConfig) Verify() error {
-	// TODO: verify config setup is correct.
 	v := reflect.ValueOf(c).Elem()
 
 	for i := 0; i < v.NumField(); i++ {
