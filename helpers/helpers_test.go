@@ -193,5 +193,22 @@ func TestHelpers(t *testing.T) {
 			})
 		})
 
+		g.Describe("Set env vars function", func() {
+			g.It("Should be able to set env vars from the configuration", func() {
+				config := new(model.DeployServerConfig)
+				config.EnvVars = map[string]string{
+					"test_env1": "1",
+					"test_env2": "hello",
+				}
+
+				SetEnvVars(config)
+				env1 := os.Getenv("test_env1")
+				env2 := os.Getenv("test_env2")
+
+				Expect(env1).To(Equal("1"), "test_env1 isn't set")
+				Expect(env2).To(Equal("hello"), "test_env2 isn't set")
+			})
+		})
+
 	})
 }
